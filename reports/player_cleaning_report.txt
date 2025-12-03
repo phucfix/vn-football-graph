@@ -1,0 +1,39 @@
+======================================================================
+BÁO CÁO LÀM SẠCH DỮ LIỆU CẦU THỦ VIỆT NAM
+Ngày: 2025-12-03 08:09
+======================================================================
+
+TỔNG KẾT:
+  - Tổng cầu thủ ban đầu: 541
+  - Cầu thủ Việt Nam: 526
+  - Loại bỏ (không phải VN hoặc trùng lặp): 15
+
+DỮ LIỆU MỞ RỘNG:
+  - province: Tỉnh/thành phố
+  - birth_year: Năm sinh
+  - height_m: Chiều cao (mét)
+  - position_normalized: Vị trí chuẩn hóa
+  - club_appearances/club_goals: Thống kê CLB
+  - national_team_appearances/national_team_goals: Thống kê ĐTQG
+  - is_national_team_player: Có thi đấu ĐTQG không
+  - career_start_year/career_end_year: Năm bắt đầu/kết thúc
+  - years_active: Số năm thi đấu
+
+CẦU THỦ BỊ LOẠI (không phải Việt Nam):
+  - Nguyễn Hồng Sơn (place: Hà Nội, Việt Nam Dân chủ Cộng hòa)
+  - Nguyễn Văn Dũng (place: Nam Định, Việt Nam Dân chủ Cộng hòa)
+  - Nguyễn Quang Hải (place: Khánh Hòa, Việt Nam)
+  - Nguyễn Hữu Thắng (place: Vinh, Nghệ An, Việt Nam Dân chủ Cộng hòa)
+  - Nguyễn Hữu Tuấn (place: Vinh, Nghệ An, Việt Nam)
+  - Nguyễn Hằng Tcheuko Minh (place: Cameroon)
+  - Trần Ngọc Sơn (place: Nghi Lộc, Nghệ An, Việt Nam)
+  - Bùi Tiến Dũng (place: Đức Thọ, Hà Tĩnh, Việt Nam)
+  - Nguyễn Thế Anh (place: Hà Nội, Việt Nam Dân chủ Cộng Hòa)
+  - Nguyễn Văn Toản (place: Hưng Yên, Việt Nam)
+  - Trần Công Minh (place: Cao Lãnh, Đồng Tháp)
+  - Nguyễn Đức Thắng (place: Hà Nội, Việt Nam)
+  - Đỗ Cẩu (place: Phnôm Pênh, Campuchia)
+  - Nguyễn Thanh Bình (place: Việt Nam)
+  - Nguyễn Công Thành (place: Tam Nông, Đồng Tháp)
+
+======================================================================

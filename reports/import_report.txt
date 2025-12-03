@@ -1,0 +1,127 @@
+============================================================
+VIETNAM FOOTBALL KNOWLEDGE GRAPH - VALIDATION REPORT
+Generated: 2025-12-02 23:54:09
+============================================================
+
+============================================================
+NODE COUNTS
+============================================================
+  Player: 528
+  Coach: 9
+  Club: 78
+  NationalTeam: 18
+  Position: 20
+  Nationality: 18
+----------------------------------------
+  TOTAL NODES: 671
+
+============================================================
+RELATIONSHIP COUNTS
+============================================================
+  PLAYED_FOR: 1055
+  PLAYED_FOR_NATIONAL: 513
+  COACHED: 6
+  COACHED_NATIONAL: 0
+  TEAMMATE: 7894
+  NATIONAL_TEAMMATE: 24807
+  UNDER_COACH: 145
+  HAS_POSITION: 521
+  HAS_NATIONALITY: 537
+----------------------------------------
+  TOTAL RELATIONSHIPS: 35478
+
+============================================================
+ORPHAN NODE CHECK
+============================================================
+  Players without PLAYED_FOR: 63
+  Coaches without clubs: 5
+  Clubs without players: 28
+
+  Completely disconnected nodes:
+    Club: 28
+    Nationality: 17
+    Province: 16
+    NationalTeam: 12
+    Position: 1
+
+============================================================
+SAMPLE QUERIES
+============================================================
+
+  Top 10 players by clubs played for:
+    Suleiman Oladoja AbdullahiNguyễn Trung Đại Dương: 9 clubs
+    Nguyễn Minh Nhựt: 8 clubs
+    Maxwell Eyerakpo (Đinh): 8 clubs
+    Dio PreyeHoàng Vissai: 7 clubs
+    Nguyễn Đình Bảo: 6 clubs
+    Phạm Hoàng Lâm: 6 clubs
+    Nguyễn Thanh Thắng: 6 clubs
+    Trần Bửu Ngọc: 6 clubs
+    Lê Sỹ Mạnh: 6 clubs
+    Đoàn Việt Cường: 5 clubs
+
+  Top 10 players by teammate count:
+    Nguyễn Xuân Nam: 90 teammates
+    Lê Hoàng Thiên: 90 teammates
+    Ngô Hoàng Thịnh: 85 teammates
+    Nguyễn Minh Nhựt: 85 teammates
+    Maxwell Eyerakpo (Đinh): 83 teammates
+    Trần Đức Cường: 81 teammates
+    Suleiman Oladoja AbdullahiNguyễn Trung Đại Dương: 79 teammates
+    Sầm Ngọc Đức: 79 teammates
+    Dương Thanh Hào: 78 teammates
+    Phạm Hoàng Lâm: 78 teammates
+
+  Top coaches by clubs managed:
+    Vũ Tiến Thành: 3 clubs
+    Nguyễn Kim Hằng: 1 clubs
+    Mai Trần Hải: 1 clubs
+    Lưu Quốc Tân: 1 clubs
+
+  Players by position:
+    MF: 145 players
+    DF: 103 players
+    FW: 67 players
+    GK: 65 players
+    CB: 55 players
+    CM: 15 players
+    LB: 11 players
+    AM: 9 players
+    DM: 9 players
+    ST: 9 players
+    WM: 8 players
+    FB: 6 players
+    WF: 6 players
+    RB: 5 players
+    -: 2 players
+    HUẤ: 2 players
+    RM: 2 players
+    LM: 1 players
+    TRU: 1 players
+
+  Top 10 clubs by player count:
+    Hà Nội: 98 players
+    Học viện Bóng đáHoàng Anh Gia Lai: 66 players
+    Câu lạc bộ bóng đá Công an Thành phố Hồ Chí Minh: 63 players
+    Đông Á Thanh Hóa: 61 players
+    Câu lạc bộ bóng đá Thép Xanh Nam Định: 58 players
+    Câu lạc bộ bóng đá SHB Đà Nẵng: 57 players
+    Câu lạc bộ bóng đá Hải Phòng: 57 players
+    Câu lạc bộ bóng đá Navibank Sài Gòn: 54 players
+    Câu lạc bộ bóng đá Thể Công – Viettel: 47 players
+    Câu lạc bộ bóng đá Sông Lam Nghệ An: 43 players
+
+============================================================
+DATA QUALITY CHECK
+============================================================
+  Players with missing name: 0
+  Players with missing position: 7
+  Players with missing nationality: 0
+  PLAYED_FOR without from_year: 5
+
+============================================================
+SUMMARY
+============================================================
+  Total nodes: 671
+  Total relationships: 35478
+  Data quality score: 87.2%
