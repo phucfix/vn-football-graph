@@ -1,0 +1,250 @@
+                                                # =============================================================================
+# Vietnam Football Knowledge Graph - Enrichment Configuration
+# =============================================================================
+# This file configures the NLP-based enrichment pipeline for extracting
+# new entities and relationships from unstructured text sources.
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+data_sources:
+  # Primary: Wikipedia article bodies (text content, not just infobox)
+  wikipedia:
+    enabled: true
+    fetch_article_body: true
+    languages: ["vi"]  # Vietnamese Wikipedia
+    sections_to_exclude:
+      - "Tham khảo"          # References
+      - "Liên kết ngoài"     # External links
+      - "Chú thích"          # Notes
+      - "Xem thêm"           # See also
+    max_articles_per_run: 1000
+    
+  # Secondary: News sources (optional, enable after Wikipedia works)
+  news:
+    enabled: false
+    sources:
+      - name: "vnexpress_sports"
+        base_url: "https://vnexpress.net/the-thao/bong-da"
+        enabled: false
+      - name: "goal_vietnam"
+        base_url: "https://www.goal.com/vi"
+        enabled: false
+    max_articles_per_source: 500
+    date_range_days: 365  # Only fetch articles from last year
+
+# =============================================================================
+# NLP MODELS
+# =============================================================================
+nlp:
+  # Named Entity Recognition
+  ner:
+    # Model type: "phobert", "underthesea", "rule_based", "hybrid"
+    model_type: "hybrid"  # PhoBERT + dictionary matching
+    
+    # PhoBERT settings (Vietnamese BERT from VinAI)
+    phobert:
+      model_name: "vinai/phobert-base"
+      # Use smaller model if GPU memory is limited
+      # model_name: "vinai/phobert-base-v2"
+      max_length: 256
+      batch_size: 16  # Reduce if OOM
+      device: "auto"  # "auto", "cuda", "cpu"
+      
+    # Dictionary-based matching (uses existing entities from Neo4j)
+    dictionary:
+      enabled: true
+      fuzzy_threshold: 0.85  # Minimum similarity for fuzzy match
+      use_aliases: true      # Include common nicknames/abbreviations
+      
+    # Entity types to recognize
+    entity_types:
+      - PLAYER
+      - COACH  
+      - CLUB
+      - NATIONAL_TEAM
+      - STADIUM
+      - PROVINCE
+      - COMPETITION
+      - EVENT
+      - DATE
+      - POSITION
+      
+  # Relation Extraction
+  relation_extraction:
+    # Method: "pattern_based", "zero_shot", "fine_tuned"
+    method: "pattern_based"
+    
+    # Pattern-based settings (recommended for Vietnamese football)
+    pattern_based:
+      use_dependency_parsing: true
+      use_regex_patterns: true
+      
+    # Zero-shot fallback for complex relations
+    zero_shot:
+      enabled: true
+      model_name: "facebook/mbart-large-50"
+      use_for_low_confidence: true
+      
+    # Relation types to extract
+    relation_types:
+      - PLAYED_FOR
+      - COACHED
+      - TRANSFERRED_TO
+      - SCORED_IN
+      - DEFEATED
+      - COMPETED_IN
+      - PLAYS_AT
+      - BORN_IN
+      - CAPTAINED
+      - WON_AWARD
+      - TEAMMATE_OF
+      
+  # Text preprocessing
+  preprocessing:
+    tokenizer: "underthesea"  # "underthesea", "vncorenlp", "pyvi"
+    sentence_segmentation: true
+    normalize_unicode: true
+    remove_urls: true
+    remove_emails: true
+    lowercase: false  # Keep original case for NER
+    min_sentence_length: 10
+    max_sentence_length: 500
+
+# =============================================================================
+# CONFIDENCE THRESHOLDS
+# =============================================================================
+confidence:
+  # Entity recognition
+  ner:
+    high: 0.90      # Dictionary exact match or very confident model
+    medium: 0.75    # Good pattern match
+    low: 0.60       # Weak signal, needs review
+    
+  # Relation extraction
+  relation:
+    high: 0.85      # Strong pattern match with clear indicators
+    medium: 0.70    # Reasonable pattern match
+    low: 0.55       # Weak pattern, likely needs verification
+    
+  # Auto-import thresholds (above this = auto-import to Neo4j)
+  auto_import:
+    entity: 0.85
+    relation: 0.75
+    
+  # Discard thresholds (below this = discard)
+  discard:
+    entity: 0.50
+    relation: 0.50
+
+# =============================================================================
+# ENTITY LINKING
+# =============================================================================
+entity_linking:
+  # String matching
+  string_matching:
+    algorithm: "jaro_winkler"  # "levenshtein", "jaro_winkler", "ratio"
+    threshold: 0.85
+    
+  # Semantic similarity (embedding-based)
+  semantic:
+    enabled: true
+    model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    threshold: 0.80
+    
+  # Vietnamese name handling
+  vietnamese_names:
+    handle_accents: true      # Nguyen = Nguyễn
+    handle_abbreviations: true # HAGL = Hoàng Anh Gia Lai
+    surname_first: true       # Vietnamese names: Nguyễn Văn A
+
+# =============================================================================
+# VALIDATION & DEDUPLICATION
+# =============================================================================
+validation:
+  # Deduplication
+  dedup:
+    entity_match_threshold: 0.90
+    relation_match_threshold: 0.95
+    
+  # Consistency checks
+  consistency:
+    check_temporal: true      # Check date conflicts
+    check_graph_structure: true  # Check for impossible relations
+    check_entity_types: true  # Check relation arg types match
+    
+  # Conflict resolution
+  conflict_resolution:
+    prefer_infobox: true     # Prefer structured data over text extraction
+    keep_both_on_conflict: true  # Keep both versions, flag for review
+
+# =============================================================================
+# NEO4J ENRICHMENT
+# =============================================================================
+neo4j:
+  # Import settings
+  import:
+    batch_size: 100
+    dry_run_first: true      # Always preview before committing
+    
+  # Source tagging
+  source_tags:
+    text_extraction: "text_extraction"
+    wikipedia_body: "wikipedia_body"
+    news_article: "news_article"
+    
+  # Weight for different sources (used in conflict resolution)
+  source_weights:
+    infobox: 1.0
+    wikipedia_body: 0.85
+    news_article: 0.70
+    
+  # New edge types to create (schema updates)
+  new_edge_types:
+    - SCORED_IN
+    - DEFEATED
+    - TRANSFERRED_TO
+    - CAPTAINED
+    - WON_AWARD
+
+# =============================================================================
+# OUTPUT PATHS
+# =============================================================================
+paths:
+  # Text sources
+  text_sources_dir: "data/text_sources"
+  wikipedia_texts_dir: "data/text_sources/wikipedia"
+  news_texts_dir: "data/text_sources/news"
+  
+  # Processed texts
+  processed_texts_dir: "data/processed_texts"
+  
+  # Enrichment outputs
+  enrichment_dir: "data/enrichment"
+  recognized_entities_file: "data/enrichment/recognized_entities.jsonl"
+  extracted_relations_file: "data/enrichment/extracted_relations.jsonl"
+  new_entities_file: "data/enrichment/new_entities.jsonl"
+  validated_facts_file: "data/enrichment/validated_facts.jsonl"
+  
+  # Reports
+  enrichment_report_file: "reports/enrichment_report.json"
+  
+  # Model cache
+  model_cache_dir: "nlp/models"
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+logging:
+  level: "INFO"
+  file: "logs/enrichment.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# =============================================================================
+# PROCESSING LIMITS (for testing/development)
+# =============================================================================
+limits:
+  # Set to -1 for unlimited
+  max_entities_to_process: -1
+  max_sentences_per_article: 500
+  max_relations_per_sentence: 10

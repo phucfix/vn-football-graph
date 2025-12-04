@@ -1,0 +1,67 @@
+# =============================================================================
+# Vietnam Football KG Enrichment - CPU-Only Dependencies (Lighter)
+# =============================================================================
+# Install with: pip install -r requirements_enrichment_cpu.txt
+# This version uses CPU-only PyTorch to save ~2GB disk space
+
+# -----------------------------------------------------------------------------
+# Core NLP - Vietnamese Language Processing
+# -----------------------------------------------------------------------------
+underthesea>=6.8.0          # Vietnamese NLP toolkit (tokenization, NER, POS)
+pyvi>=0.1.1                  # Vietnamese text processing
+
+# -----------------------------------------------------------------------------
+# Transformers & Deep Learning (CPU-only)
+# -----------------------------------------------------------------------------
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch                        # PyTorch CPU-only version
+transformers>=4.35.0         # Hugging Face transformers (PhoBERT, etc.)
+tokenizers>=0.15.0           # Fast tokenizers
+accelerate>=0.25.0           # Training/inference acceleration
+sentencepiece>=0.1.99        # Tokenization for PhoBERT
+
+# -----------------------------------------------------------------------------
+# Text Processing
+# -----------------------------------------------------------------------------
+beautifulsoup4>=4.12.0       # HTML parsing
+lxml>=4.9.0                  # XML/HTML parser
+html2text>=2020.1.16         # Convert HTML to plain text
+regex>=2023.0.0              # Advanced regex
+unidecode>=1.3.0             # Unicode to ASCII
+ftfy>=6.1.0                  # Fix text encoding issues
+
+# -----------------------------------------------------------------------------
+# Web Scraping (for news articles)
+# -----------------------------------------------------------------------------
+requests>=2.31.0             # HTTP requests
+
+# -----------------------------------------------------------------------------
+# Data Processing
+# -----------------------------------------------------------------------------
+pandas>=2.0.0                # Data manipulation
+numpy>=1.24.0                # Numerical computing
+jsonlines>=4.0.0             # JSONL file handling
+
+# -----------------------------------------------------------------------------
+# String Matching & Similarity
+# -----------------------------------------------------------------------------
+rapidfuzz>=3.5.0             # Fast fuzzy string matching
+
+# -----------------------------------------------------------------------------
+# Neo4j
+# -----------------------------------------------------------------------------
+neo4j>=5.0.0                 # Neo4j driver
+
+# -----------------------------------------------------------------------------
+# Configuration & CLI
+# -----------------------------------------------------------------------------
+pyyaml>=6.0.0                # YAML config parsing
+click>=8.1.0                 # CLI framework
+python-dotenv>=1.0.0         # Environment variables
+
+# -----------------------------------------------------------------------------
+# Progress & Logging
+# -----------------------------------------------------------------------------
+tqdm>=4.65.0                 # Progress bars
+rich>=13.0.0                 # Rich terminal output
+loguru>=0.7.0                # Better logging

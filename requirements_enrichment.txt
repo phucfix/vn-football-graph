@@ -1,0 +1,90 @@
+# =============================================================================
+# Vietnam Football KG Enrichment - Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements_enrichment.txt
+
+# -----------------------------------------------------------------------------
+# Core NLP - Vietnamese Language Processing
+# -----------------------------------------------------------------------------
+underthesea>=6.8.0          # Vietnamese NLP toolkit (tokenization, NER, POS)
+pyvi>=0.1.1                  # Vietnamese text processing
+
+# -----------------------------------------------------------------------------
+# Transformers & Deep Learning
+# -----------------------------------------------------------------------------
+torch>=2.0.0                 # PyTorch (CPU/GPU)
+transformers>=4.35.0         # Hugging Face transformers (PhoBERT, etc.)
+tokenizers>=0.15.0           # Fast tokenizers
+accelerate>=0.25.0           # Training/inference acceleration
+sentencepiece>=0.1.99        # Tokenization for PhoBERT
+
+# -----------------------------------------------------------------------------
+# Sentence Transformers (for entity linking)
+# -----------------------------------------------------------------------------
+sentence-transformers>=2.2.2 # Multilingual sentence embeddings
+
+# -----------------------------------------------------------------------------
+# Text Processing
+# -----------------------------------------------------------------------------
+spacy>=3.7.0                 # NLP pipeline
+beautifulsoup4>=4.12.0       # HTML parsing
+lxml>=4.9.0                  # XML/HTML parser
+html2text>=2020.1.16         # Convert HTML to plain text
+regex>=2023.0.0              # Advanced regex
+unidecode>=1.3.0             # Unicode to ASCII
+ftfy>=6.1.0                  # Fix text encoding issues
+
+# -----------------------------------------------------------------------------
+# Web Scraping (for news articles)
+# -----------------------------------------------------------------------------
+newspaper3k>=0.2.8           # Article extraction
+requests>=2.31.0             # HTTP requests
+aiohttp>=3.9.0               # Async HTTP
+
+# -----------------------------------------------------------------------------
+# Data Processing
+# -----------------------------------------------------------------------------
+pandas>=2.0.0                # Data manipulation
+numpy>=1.24.0                # Numerical computing
+jsonlines>=4.0.0             # JSONL file handling
+
+# -----------------------------------------------------------------------------
+# String Matching & Similarity
+# -----------------------------------------------------------------------------
+rapidfuzz>=3.5.0             # Fast fuzzy string matching
+jellyfish>=1.0.0             # String comparison algorithms
+python-Levenshtein>=0.23.0   # Levenshtein distance
+
+# -----------------------------------------------------------------------------
+# Neo4j
+# -----------------------------------------------------------------------------
+neo4j>=5.0.0                 # Neo4j driver
+
+# -----------------------------------------------------------------------------
+# Configuration & CLI
+# -----------------------------------------------------------------------------
+pyyaml>=6.0.0                # YAML config parsing
+click>=8.1.0                 # CLI framework
+python-dotenv>=1.0.0         # Environment variables
+
+# -----------------------------------------------------------------------------
+# Progress & Logging
+# -----------------------------------------------------------------------------
+tqdm>=4.65.0                 # Progress bars
+rich>=13.0.0                 # Rich terminal output
+loguru>=0.7.0                # Better logging
+
+# -----------------------------------------------------------------------------
+# Testing & Quality
+# -----------------------------------------------------------------------------
+pytest>=7.4.0                # Testing framework
+pytest-asyncio>=0.21.0       # Async test support
+
+# -----------------------------------------------------------------------------
+# Optional: GPU Support
+# -----------------------------------------------------------------------------
+# Uncomment if using NVIDIA GPU:
+# torch-cuda>=2.0.0          # CUDA support for PyTorch
+
+# Note: For Arch Linux with GPU, you may need:
+# pip install torch --index-url https://download.pytorch.org/whl/cu121

@@ -22,6 +22,12 @@ logs/
 data/raw/
 data/parsed/
 data/processed/
+data/text_sources/
+data/processed_texts/
+data/enrichment/
+
+# Model cache
+nlp/models/
 
 # VSCode
 .vscode/

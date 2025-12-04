@@ -1,4 +1,5 @@
-.PHONY: all crawl parse normalize build-rels import validate clean help
+.PHONY: all crawl parse normalize build-rels import validate clean help \
+        enrich collect-texts preprocess-texts run-ner run-re validate-enrichment import-enriched enrich-report
 
 # Load .env file if exists
 ifneq (,$(wildcard ./.env))
@@ -17,7 +18,7 @@ PYTHON := $(shell if [ -f .venv/bin/python ]; then echo ".venv/bin/python"; else
 help:
 	@echo "Vietnam Football Knowledge Graph - Makefile"
 	@echo ""
-	@echo "Usage:"
+	@echo "=== ORIGINAL PIPELINE ==="
 	@echo "  make all              Run the complete pipeline"
 	@echo "  make crawl            Fetch pages from Wikipedia"
 	@echo "  make parse            Parse wikitext infoboxes"
@@ -27,6 +28,22 @@ help:
 	@echo "  make import           Import data to Neo4j"
 	@echo "  make validate         Validate the imported graph"
 	@echo "  make clean            Remove all generated data"
+	@echo ""
+	@echo "=== ENRICHMENT PIPELINE (NLP) ==="
+	@echo "  make enrich           Run complete enrichment pipeline"
+	@echo "  make collect-texts    Collect Wikipedia article bodies"
+	@echo "  make preprocess-texts Preprocess texts for NLP"
+	@echo "  make run-ner          Run Named Entity Recognition"
+	@echo "  make run-re           Run Relation Extraction"
+	@echo "  make validate-enrichment  Validate extracted data"
+	@echo "  make import-enriched  Import enriched data to Neo4j"
+	@echo "  make import-enriched-dry  Preview enrichment (dry run)"
+	@echo "  make enrich-report    Generate enrichment analytics"
+	@echo "  make clean-enrichment Remove enrichment data"
+	@echo ""
+	@echo "=== SETUP ==="
+	@echo "  make install          Install base dependencies"
+	@echo "  make install-enrichment  Install NLP dependencies"
 	@echo ""
 	@echo "Environment variables:"
 	@echo "  NEO4J_URI             Neo4j connection URI"
@@ -126,6 +143,81 @@ clean-processed:
 install:
 	pip install -r requirements.txt
 
+# Install enrichment dependencies (includes NLP libraries)
+install-enrichment:
+	pip install -r requirements_enrichment.txt
+
 # Development: re-run from parsing onwards (skip crawl)
 reprocess: parse normalize build-rels
-	@echo "Reprocessing complete!""
+	@echo "Reprocessing complete!"
+
+# =============================================================================
+# ENRICHMENT PIPELINE (NLP-based Knowledge Graph Enrichment)
+# =============================================================================
+
+# Run complete enrichment pipeline
+enrich: collect-texts preprocess-texts run-ner run-re validate-enrichment import-enriched
+	@echo "Enrichment pipeline complete!"
+
+# Step E1: Collect text from Wikipedia article bodies
+collect-texts:
+	@echo "=== Enrichment Step 1: Collecting Text Sources ==="
+	$(PYTHON) -m data_enrichment.text_collector --collect-wiki
+
+# Step E2: Preprocess collected texts
+preprocess-texts:
+	@echo "=== Enrichment Step 2: Preprocessing Texts ==="
+	$(PYTHON) -m data_enrichment.text_preprocessor --process-all
+
+# Step E3: Run Named Entity Recognition
+run-ner:
+	@echo "=== Enrichment Step 3: Running NER ==="
+	$(PYTHON) -m nlp.entity_recognizer --process-all
+
+# Step E4: Run Relation Extraction
+run-re:
+	@echo "=== Enrichment Step 4: Running Relation Extraction ==="
+	$(PYTHON) -m nlp.relation_extractor --process-all
+
+# Step E5: Validate and deduplicate extracted data
+validate-enrichment:
+	@echo "=== Enrichment Step 5: Validating Extracted Data ==="
+	$(PYTHON) -m enrichment.validation --validate-all
+	$(PYTHON) -m enrichment.deduplication --deduplicate-all
+
+# Step E6: Import enriched data to Neo4j
+import-enriched:
+	@echo "=== Enrichment Step 6: Importing Enriched Data ==="
+	@if [ -z "$(NEO4J_URI)" ]; then \
+		echo "Error: NEO4J_URI not set"; \
+		exit 1; \
+	fi
+	NEO4J_URI="$(NEO4J_URI)" NEO4J_USER="$(NEO4J_USER)" NEO4J_PASSWORD="$(NEO4J_PASSWORD)" \
+		$(PYTHON) -m neo4j_enrichment.enrich_graph --import-all --execute
+
+# Step E6 (dry-run): Preview enrichment without importing
+import-enriched-dry:
+	@echo "=== Enrichment Step 6: Dry Run (Preview Only) ==="
+	$(PYTHON) -m neo4j_enrichment.enrich_graph --import-all --dry-run
+
+# Generate enrichment analytics report
+enrich-report:
+	@echo "=== Generating Enrichment Report ==="
+	@if [ -z "$(NEO4J_URI)" ]; then \
+		echo "Error: NEO4J_URI not set"; \
+		exit 1; \
+	fi
+	$(PYTHON) -m tools.enrichment_analytics \
+		--uri "$(NEO4J_URI)" \
+		--user "$(NEO4J_USER)" \
+		--password "$(NEO4J_PASSWORD)"
+
+# Clean enrichment data only
+clean-enrichment:
+	@echo "Cleaning enrichment data..."
+	rm -rf data/text_sources/*.json
+	rm -rf data/processed_texts/*.jsonl
+	rm -rf data/enrichment/*.jsonl
+	rm -rf data/enrichment/*.csv
+	rm -rf reports/enrichment_*.txt
+	@echo "Enrichment data cleaned!"
