@@ -51,6 +51,19 @@ vietnam-football-knowledge-graph/
 ├── Makefile
 ├── run.sh
 └── README.md
+
+## 🤖 GraphRAG Chatbot
+├── chatbot/
+│   ├── README.md                    # Chatbot documentation
+│   ├── config.py                    # Chatbot configuration
+│   ├── knowledge_graph.py           # Neo4j interface
+│   ├── multi_hop_reasoning.py       # Multi-hop reasoning engine
+│   ├── chatbot.py                   # Main chatbot classes
+│   ├── question_generator.py        # Evaluation question generator
+│   ├── evaluator.py                 # Evaluation framework
+│   └── evaluation/
+│       ├── questions.json           # 2500 evaluation questions
+│       └── results.json             # Evaluation results
 ```
 
 ## 🚀 Quick Start
@@ -289,6 +302,49 @@ RETURN path
 - Check `data/parsed/*.jsonl` for actual parsed data
 
 ### Import is slow
+
+## 🤖 GraphRAG Chatbot
+
+### Overview
+
+Chatbot dựa trên đồ thị tri thức với:
+- **Small LLM**: Qwen2-0.5B-Instruct (500M params)
+- **GraphRAG**: Graph-based Retrieval Augmented Generation
+- **Multi-hop Reasoning**: Hỗ trợ 1-hop, 2-hop, 3-hop queries
+- **2500 câu hỏi đánh giá**: True/False, Yes/No, MCQ
+
+### Quick Start
+
+```bash
+# Sử dụng chatbot
+from chatbot import create_chatbot
+
+bot = create_chatbot(use_llm=False)  # Graph-only mode
+answer = bot.chat("Nguyễn Văn Quyết chơi cho đội nào?")
+print(answer)
+bot.close()
+```
+
+### Evaluation Results
+
+| Metric | Value |
+|--------|-------|
+| **Overall Accuracy** | 76.80% |
+| **MCQ Accuracy** | 95.79% |
+| **Yes/No Accuracy** | 79.41% |
+| **1-hop Accuracy** | 90.08% |
+
+### Run Evaluation
+
+```bash
+# Generate questions (2500)
+python -m chatbot.run_evaluation --generate
+
+# Evaluate chatbot
+python -m chatbot.run_evaluation --evaluate --max-questions 500
+```
+
+Xem chi tiết tại [chatbot/README.md](chatbot/README.md)
 
 - Reduce batch size: `--batch-size 100`
 - Aura free tier has rate limits

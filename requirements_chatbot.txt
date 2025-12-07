@@ -1,0 +1,22 @@
+# Requirements for Vietnam Football Knowledge Graph Chatbot
+# Install with: pip install -r requirements_chatbot.txt
+
+# Core dependencies
+neo4j>=5.0.0                    # Neo4j Python driver
+python-dotenv>=1.0.0            # Environment variables
+
+# LLM and NLP
+transformers>=4.35.0            # Hugging Face Transformers
+torch>=2.0.0                    # PyTorch
+accelerate>=0.24.0              # Model acceleration
+sentencepiece>=0.1.99           # Tokenization
+
+# Optional: For sentence embeddings
+sentence-transformers>=2.2.0    # Sentence embeddings
+
+# Utilities
+tqdm>=4.65.0                    # Progress bars
+
+# Optional: External API comparison
+# openai>=1.0.0                 # OpenAI API (for ChatGPT comparison)
+# google-generativeai>=0.3.0    # Google Gemini API
