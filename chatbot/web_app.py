@@ -22,7 +22,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚽ Vietnam Football Chatbot</title>
+    <title>Vietnam Football Chatbot</title>
     <style>
         * {
             margin: 0;
@@ -31,173 +31,239 @@ HTML_TEMPLATE = """
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #f7f7f8;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #202123;
+        }
+        
+        .header-info {
+            font-size: 13px;
+            color: #6e6e80;
+        }
+        
+        /* Main container */
         .container {
-            max-width: 900px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            overflow: hidden;
         }
         
-        header {
-            text-align: center;
-            padding: 30px 0;
-        }
-        
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff6b6b, #ffd93d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        header p {
-            color: #a0a0a0;
-            font-size: 1.1em;
-        }
-        
-        .chat-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .chat-messages {
-            height: 450px;
+        /* Messages area */
+        .messages {
+            flex: 1;
             overflow-y: auto;
             padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .message {
-            margin-bottom: 15px;
             display: flex;
-            align-items: flex-start;
-            animation: fadeIn 0.3s ease;
+            flex-direction: column;
+            gap: 20px;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .messages::-webkit-scrollbar-thumb {
+            background: #d1d1d6;
+            border-radius: 4px;
+        }
+        
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #b1b1b6;
+        }
+        
+        /* Message styles */
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 100%;
         }
         
         .message.user {
             flex-direction: row-reverse;
         }
         
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            flex-shrink: 0;
-        }
-        
-        .message.user .message-avatar {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            margin-left: 10px;
-        }
-        
-        .message.bot .message-avatar {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            margin-right: 10px;
-        }
-        
         .message-content {
-            max-width: 70%;
-            padding: 12px 18px;
+            padding: 12px 16px;
             border-radius: 18px;
+            max-width: 70%;
             line-height: 1.5;
+            font-size: 15px;
         }
         
         .message.user .message-content {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-bottom-right-radius: 5px;
+            background: #2b2b2b;
+            color: white;
         }
         
         .message.bot .message-content {
-            background: rgba(255, 255, 255, 0.1);
-            border-bottom-left-radius: 5px;
+            background: white;
+            color: #202123;
+            border: 1px solid #e5e5e5;
+        }
+        
+        /* Input area */
+        .input-area {
+            background: white;
+            border-top: 1px solid #e5e5e5;
+            padding: 20px;
         }
         
         .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .input-wrapper {
             display: flex;
-            gap: 10px;
+            background: white;
+            border: 1px solid #d1d1d6;
+            border-radius: 12px;
+            padding: 8px 12px;
+            transition: border-color 0.2s;
+        }
+        
+        .input-wrapper:focus-within {
+            border-color: #2b2b2b;
         }
         
         #user-input {
             flex: 1;
-            padding: 15px 20px;
             border: none;
-            border-radius: 25px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 1em;
             outline: none;
-            transition: all 0.3s ease;
-        }
-        
-        #user-input:focus {
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
+            font-size: 15px;
+            font-family: inherit;
+            color: #202123;
+            background: transparent;
+            resize: none;
+            max-height: 200px;
+            min-height: 24px;
+            line-height: 24px;
         }
         
         #user-input::placeholder {
-            color: #888;
+            color: #8e8ea0;
         }
         
         #send-btn {
-            padding: 15px 30px;
+            background: transparent;
             border: none;
-            border-radius: 25px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            font-size: 1em;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        #send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
         }
         
         #send-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.3;
             cursor: not-allowed;
         }
         
-        .examples {
-            margin-top: 20px;
+        #send-btn:not(:disabled):hover {
+            opacity: 0.8;
         }
         
-        .examples h3 {
-            color: #ffd93d;
-            margin-bottom: 15px;
-            font-size: 1.1em;
+        /* Send button icon */
+        .send-icon {
+            width: 24px;
+            height: 24px;
+            fill: #202123;
         }
         
-        .example-buttons {
+        #send-btn:disabled .send-icon {
+            fill: #8e8ea0;
+        }
+        
+        /* Empty state */
+        .empty-state {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px 20px;
+            text-align: center;
         }
         
-        .example-btn {
-            padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
+        .empty-state h2 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #202123;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            color: #6e6e80;
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 18px;
+            width: fit-content;
+        }
+        
+        .typing-indicator.show {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #8e8ea0;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
             background: transparent;
             color: #fff;
             cursor: pointer;
@@ -282,90 +348,88 @@ HTML_TEMPLATE = """
     </style>
 </head>
 <body>
+    <!-- Header -->
+    <div class="header">
+        <h1>Vietnam Football Chatbot</h1>
+    </div>
+    
+    <!-- Main container -->
     <div class="container">
-        <header>
-            <h1>⚽ Vietnam Football Chatbot</h1>
-            <p>Hỏi đáp về bóng đá Việt Nam với AI sử dụng đồ thị tri thức</p>
-        </header>
-        
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value">95.5%</div>
-                <div class="stat-label">Độ chính xác</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">1,060</div>
-                <div class="stat-label">Thực thể</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">39,114</div>
-                <div class="stat-label">Quan hệ</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">3-hop</div>
-                <div class="stat-label">Multi-hop</div>
+        <!-- Messages area -->
+        <div class="messages" id="messages">
+            <!-- Empty state (hidden after first message) -->
+            <div class="empty-state" id="empty-state">
+                <h2>Vietnam Football Chatbot</h2>
+                <p>Hỏi tôi về cầu thủ, câu lạc bộ, và đội tuyển bóng đá Việt Nam</p>
             </div>
         </div>
         
-        <div class="chat-container">
-            <div class="chat-messages" id="chat-messages">
-                <div class="message bot">
-                    <div class="message-avatar">🤖</div>
-                    <div class="message-content">
-                        Xin chào! Tôi là chatbot chuyên về bóng đá Việt Nam. 
-                        Bạn có thể hỏi tôi về cầu thủ, câu lạc bộ, đội tuyển quốc gia, 
-                        và các mối quan hệ giữa họ. Hãy thử hỏi tôi nhé! ⚽
-                    </div>
+        <!-- Input area -->
+        <div class="input-area">
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="user-input" 
+                        placeholder="Gửi tin nhắn..." 
+                        rows="1"
+                        autocomplete="off"
+                    ></textarea>
+                    <button id="send-btn" disabled>
+                        <svg class="send-icon" viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <div class="typing-indicator" id="typing-indicator">
-                🤖 Đang suy nghĩ...
-            </div>
-            <div class="input-container">
-                <input type="text" id="user-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off">
-                <button id="send-btn">Gửi</button>
-            </div>
-        </div>
-        
-        <div class="examples">
-            <h3>💡 Câu hỏi mẫu:</h3>
-            <div class="example-buttons">
-                <button class="example-btn" onclick="askExample(this)">Quang Hải chơi cho CLB nào?</button>
-                <button class="example-btn" onclick="askExample(this)">Công Phượng sinh ra ở đâu?</button>
-                <button class="example-btn" onclick="askExample(this)">Ai là đồng đội của Văn Toàn ở HAGL?</button>
-                <button class="example-btn" onclick="askExample(this)">Quang Hải và Văn Hậu có chơi cùng CLB không?</button>
-                <button class="example-btn" onclick="askExample(this)">Tiến Linh từng khoác áo đội tuyển Việt Nam chưa?</button>
-                <button class="example-btn" onclick="askExample(this)">HLV Park Hang-seo dẫn dắt đội nào?</button>
-            </div>
-        </div>
-        
-        <div class="info-box">
-            <h4>📋 Các loại câu hỏi hỗ trợ:</h4>
-            <ul>
-                <li><strong>Đúng/Sai:</strong> "Quang Hải chơi cho Hà Nội FC, đúng hay sai?"</li>
-                <li><strong>Có/Không:</strong> "Công Phượng có từng chơi cho HAGL không?"</li>
-                <li><strong>Thông tin:</strong> "Văn Lâm sinh ra ở đâu?"</li>
-                <li><strong>Multi-hop (2 bước):</strong> "Quang Hải và Văn Hậu có chơi cùng CLB không?"</li>
-                <li><strong>Multi-hop (3 bước):</strong> "Ai chơi cho CLB ở cùng tỉnh với Công Phượng?"</li>
-            </ul>
         </div>
     </div>
     
     <script>
-        const chatMessages = document.getElementById('chat-messages');
+        const chatMessages = document.getElementById('messages');
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
-        const typingIndicator = document.getElementById('typing-indicator');
+        const emptyState = document.getElementById('empty-state');
+        
+        // Auto-resize textarea and enable/disable send button
+        userInput.addEventListener('input', () => {
+            userInput.style.height = 'auto';
+            userInput.style.height = Math.min(userInput.scrollHeight, 200) + 'px';
+            sendBtn.disabled = !userInput.value.trim();
+        });
         
         function addMessage(content, isUser) {
+            // Hide empty state after first message
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
             messageDiv.innerHTML = `
-                <div class="message-avatar">${isUser ? '👤' : '🤖'}</div>
                 <div class="message-content">${content}</div>
             `;
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function addTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="message-content">
+                    <span style="opacity: 0.5">Đang trả lời...</span>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function removeTypingIndicator() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) {
+                typing.remove();
+            }
         }
         
         async function sendMessage() {
@@ -375,8 +439,11 @@ HTML_TEMPLATE = """
             // Add user message
             addMessage(message, true);
             userInput.value = '';
+            userInput.style.height = 'auto'; // Reset height
             sendBtn.disabled = true;
-            typingIndicator.classList.add('show');
+            
+            // Show typing indicator
+            addTypingIndicator();
             
             try {
                 const response = await fetch('/chat', {
@@ -388,31 +455,34 @@ HTML_TEMPLATE = """
                 });
                 
                 const data = await response.json();
+                
+                // Remove typing indicator and add response
+                removeTypingIndicator();
                 addMessage(data.response, false);
             } catch (error) {
+                removeTypingIndicator();
                 addMessage('Xin lỗi, có lỗi xảy ra. Vui lòng thử lại!', false);
             }
             
-            typingIndicator.classList.remove('show');
             sendBtn.disabled = false;
             userInput.focus();
         }
         
-        function askExample(btn) {
-            userInput.value = btn.textContent;
-            sendMessage();
-        }
+        // Handle Enter and Shift+Enter
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
         
         sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
         
         userInput.focus();
     </script>
 </body>
 </html>
-"""
+""" 
 
 @app.route('/')
 def home():

@@ -20,6 +20,7 @@ from .config import (
 )
 from .knowledge_graph import KnowledgeGraph, Entity, Relationship, get_kg
 from .multi_hop_reasoning import MultiHopReasoner, ReasoningChain, QueryType
+from .entity_mapping import normalize_entity_name
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -214,9 +215,16 @@ class GraphRAGChatbot:
                 
                 if phrase.lower() in skip_words:
                     continue
+                
+                # Normalize entity name (e.g., "Công Phượng" -> "Nguyễn Công Phượng")
+                normalized_phrase = normalize_entity_name(phrase, entity_type="auto")
                     
-                # Search in knowledge graph
-                matches = self.kg.search_entities(phrase, limit=1)
+                # Search in knowledge graph with both original and normalized names
+                matches = self.kg.search_entities(normalized_phrase, limit=1)
+                if not matches and normalized_phrase != phrase:
+                    # Try original if normalized didn't work
+                    matches = self.kg.search_entities(phrase, limit=1)
+                    
                 if matches:
                     entities.append(matches[0].name)
                     used_indices.update(range(i, i + n))

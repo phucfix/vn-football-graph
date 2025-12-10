@@ -100,13 +100,25 @@ class GraphReasoningChatbot:
             if player.lower() in text_lower:
                 return player
         
-        # Thử match với tên ngắn
-        for player in all_players:
-            for variant in self._normalize_name(player):
-                if len(variant) > 3 and variant in text_lower:
-                    return player
+        # Thử match với tên ngắn - ưu tiên variant dài hơn (ít false positive)
+        # Sort by length desc để match "quang hải" trước "hải"
+        best_match = None
+        best_variant_len = 0
         
-        return None
+        for player in all_players:
+            variants = self._normalize_name(player)
+            for variant in variants:
+                # Chỉ match nếu variant >= 5 ký tự (tránh match 1 từ đơn)
+                if len(variant) >= 5 and variant in text_lower:
+                    # Kiểm tra word boundary để tránh match "quang" trong "nhật quang"
+                    import re
+                    pattern = r'\b' + re.escape(variant) + r'\b'
+                    if re.search(pattern, text_lower):
+                        if len(variant) > best_variant_len:
+                            best_match = player
+                            best_variant_len = len(variant)
+        
+        return best_match
     
     def _find_players(self, text: str) -> List[str]:
         """Tìm tất cả tên cầu thủ trong text (ưu tiên tên đầy đủ)."""
@@ -140,6 +152,33 @@ class GraphReasoningChatbot:
         
         return list(found_short)[:2]  # Chỉ lấy tối đa 2 cầu thủ
     
+    # Mapping các tên viết tắt phổ biến (class-level constant)
+    CLUB_ALIASES = {
+        'hagl': 'hoàng anh gia lai',
+        'slna': 'sông lam nghệ an',
+        'viettel': 'thể công',
+        'hà nội fc': 'hà nội',
+        'tp. hcm': 'thành phố hồ chí minh',
+        'tp hcm': 'thành phố hồ chí minh',
+        'tphcm': 'thành phố hồ chí minh',
+    }
+    
+    def _match_club_name(self, choice_text: str, club_full_name: str) -> bool:
+        """Check if choice text matches club full name (with alias support)."""
+        choice_lower = choice_text.lower().strip()
+        club_lower = club_full_name.lower()
+        
+        # Exact substring match
+        if choice_lower in club_lower or club_lower in choice_lower:
+            return True
+        
+        # Check aliases
+        for alias, canonical in self.CLUB_ALIASES.items():
+            if alias in choice_lower and canonical in club_lower:
+                return True
+        
+        return False
+    
     def _find_club(self, text: str) -> Optional[str]:
         """Tìm tên CLB trong text (hỗ trợ tên ngắn và viết tắt)."""
         text_lower = text.lower()
@@ -149,7 +188,7 @@ class GraphReasoningChatbot:
         for clubs in self._coach_clubs.values():
             all_clubs.update(clubs)
         
-        # Mapping các tên viết tắt phổ biến
+        # Mapping các tên viết tắt phổ biến (for backward compat)
         club_aliases = {
             'hagl': 'Câu lạc bộ bóng đá Hoàng Anh Gia Lai',
             'hoàng anh gia lai': 'Câu lạc bộ bóng đá Hoàng Anh Gia Lai',
@@ -355,20 +394,36 @@ class GraphReasoningChatbot:
         Returns:
             (selected_choice: str, confidence: float)
         """
-        q_lower = question.lower()
+        # Normalize: loại bỏ khoảng trắng thừa trước dấu ?
+        q_normalized = question.strip()
+        q_normalized = q_normalized.replace(" ?", "?").replace("  ", " ")
+        q_lower = q_normalized.lower()
         
-        # Pattern: [Player] đã chơi cho CLB nào?
-        if "đã chơi cho" in q_lower and ("câu lạc bộ nào" in q_lower or "clb nào" in q_lower):
+        # Pattern: [Player] (đã) chơi cho CLB/đội nào?
+        if ("chơi cho" in q_lower or "thi đấu cho" in q_lower) and \
+           ("câu lạc bộ nào" in q_lower or "clb nào" in q_lower or "đội nào" in q_lower or "nào" in q_lower):
             player = self._find_player(question)
             if player:
                 clubs = self.get_player_clubs(player)
+                # Match tất cả choices có trong clubs với alias support
+                matched_choices = []
                 for choice in choices:
+                    clean_choice = choice.split('.', 1)[-1].strip() if '.' in choice else choice
                     for club in clubs:
-                        if club.lower() in choice.lower() or choice.lower() in club.lower():
-                            return choice, 1.0
+                        # Dùng _match_club_name để hỗ trợ alias
+                        if self._match_club_name(clean_choice, club):
+                            # Tính độ ưu tiên: viết tắt ngắn > tên đầy đủ
+                            priority = 10 if len(clean_choice) <= 10 else 5
+                            matched_choices.append((choice, club, priority))
+                            break
+                
+                if matched_choices:
+                    # Sort by priority (viết tắt được ưu tiên), return first
+                    matched_choices.sort(key=lambda x: x[2], reverse=True)
+                    return matched_choices[0][0], 1.0
         
-        # Pattern: [Player] chơi cho đội nào?
-        if "chơi cho đội nào" in q_lower or "chơi cho đội" in q_lower:
+        # Pattern: [Player] chơi cho đội nào? (fallback)
+        if "chơi cho" in q_lower or "thi đấu cho" in q_lower:
             player = self._find_player(question)
             if player:
                 clubs = self.get_player_clubs(player)
@@ -440,5 +495,55 @@ class GraphReasoningChatbot:
                         if teammate.lower() in choice.lower() or choice.lower() in teammate.lower():
                             return choice, 1.0
         
-        logger.warning(f"Cannot parse MCQ: {question}")
-        return choices[0], 0.3
+        # ========== FALLBACK THÔNG MINH ==========
+        # Nếu không parse được câu hỏi, thử tìm entity trong graph và match với choices
+        logger.warning(f"Cannot parse MCQ pattern: {question}")
+        
+        # Thử tìm cầu thủ
+        player = self._find_player(question)
+        if player:
+            # Thử tìm CLB của cầu thủ
+            clubs = self.get_player_clubs(player)
+            if clubs:
+                for choice in choices:
+                    clean_choice = choice.split('.', 1)[-1].strip() if '.' in choice else choice
+                    for club in clubs:
+                        if club.lower() in clean_choice.lower() or clean_choice.lower() in club.lower():
+                            logger.info(f"Fallback matched: {player} -> {club} in choice '{choice}'")
+                            return choice, 0.8
+            
+            # Thử tìm tỉnh của cầu thủ
+            province = self.get_player_province(player)
+            if province:
+                for choice in choices:
+                    clean_choice = choice.split('.', 1)[-1].strip() if '.' in choice else choice
+                    if province.lower() in clean_choice.lower() or clean_choice.lower() in province.lower():
+                        logger.info(f"Fallback matched: {player} -> {province} in choice '{choice}'")
+                        return choice, 0.8
+        
+        # Thử tìm CLB
+        club = self._find_club(question)
+        if club:
+            province = self.get_club_province(club)
+            if province:
+                for choice in choices:
+                    clean_choice = choice.split('.', 1)[-1].strip() if '.' in choice else choice
+                    if province.lower() in clean_choice.lower() or clean_choice.lower() in province.lower():
+                        logger.info(f"Fallback matched: {club} -> {province} in choice '{choice}'")
+                        return choice, 0.8
+        
+        # Thử tìm HLV
+        coach = self._find_coach(question)
+        if coach:
+            clubs = self.get_coach_clubs(coach)
+            if clubs:
+                for choice in choices:
+                    clean_choice = choice.split('.', 1)[-1].strip() if '.' in choice else choice
+                    for club in clubs:
+                        if club.lower() in clean_choice.lower() or clean_choice.lower() in club.lower():
+                            logger.info(f"Fallback matched: {coach} -> {club} in choice '{choice}'")
+                            return choice, 0.8
+        
+        # Nếu vẫn không tìm được, trả về None với confidence thấp
+        logger.warning(f"No entity found in question: {question}")
+        return choices[0], 0.1  # Confidence rất thấp để báo hiệu không chắc chắn
